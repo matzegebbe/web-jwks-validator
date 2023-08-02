@@ -20,5 +20,5 @@ jobs:
           push: true
           tags: ghcr.io/${{ github.repository }}:${{ github.ref_name }}-${{ github.run_id }}
         env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+          DOCKER_USERNAME:  ${{ github.actor }}
+          DOCKER_PASSWORD:  ${{ secrets.GITHUB_TOKEN }}
