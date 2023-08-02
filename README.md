@@ -22,18 +22,21 @@ The JWKS is refreshed every 5 minutes.
 
 ## Usage
 
-To run the server, you need to have Go installed. Then you can build and run the server like this:
+Then you can build and run the server like this:
 
 ```bash
 go build
-./<binary-name>
-```
-
-```bash
 export PORT=8080
 export JWKS_URL="https://example.com/path/to/jwks"
 export AUTH_HEADER_NAME="Authorization"
 export AUTH_HEADER_RETURN="true"
 export SEND_BACK_CLAIMS="true"
 export CACHE_TTL=300
+./web-jwks-validator
+```
+
+## docker build
+
+```
+docker build . -t web-jwks-validator
 ```

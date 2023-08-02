@@ -23,6 +23,6 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v2
         with:
-          context: .  # Path to the directory containing the Dockerfile (current directory in this case)
+          context: .
           push: true
-          tags: ghcr.io/${{ github.repository }}:${{ github.ref_name }}-${{ github.run_id }}
+          tags: ghcr.io/${{ github.repository }}/web-jwks-validator:${{ github.ref_name }}-${{ github.run_id }}
