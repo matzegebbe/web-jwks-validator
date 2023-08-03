@@ -69,24 +69,27 @@ func validateToken(
 			return
 		}
 
-		cl := jwt.Claims{}
+		claims := make(map[string]interface{})
 		for _, key := range keys.Keys {
-			err = token.Claims(key, &cl)
+			err = token.Claims(key, &claims)
 			if err == nil {
-				allClaims := make(map[string]interface{})
-				if err := token.UnsafeClaimsWithoutVerification(&allClaims); err != nil {
-					http.Error(w, "Failed to parse custom claims", http.StatusInternalServerError)
-					return
-				}
-				responseJSON, err := json.Marshal(allClaims)
-				if err != nil {
-					http.Error(w, "Failed to marshal JSON", http.StatusInternalServerError)
-					return
-				}
 				if sendAccessTokenBack {
 					w.Header().Set(authHeaderName, tokenString)
 				}
-				w.Write(responseJSON)
+				if sendAllClaimsAsJson {
+					responseJSON, err := json.Marshal(claims)
+					if err != nil {
+						http.Error(w, "Failed to marshal JSON", http.StatusInternalServerError)
+						return
+					}
+					_, err = w.Write(responseJSON)
+					if err != nil {
+						http.Error(w, "Failed to write JSON", http.StatusInternalServerError)
+						return
+					}
+				} else {
+					w.Write([]byte("Token valid."))
+				}
 				return
 			}
 		}
