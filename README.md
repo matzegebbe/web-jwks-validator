@@ -50,6 +50,7 @@ feature of `ingress-nginx`.
    export JWKS_URL="https://login.windows.net/common/discovery/keys"
    export AUTH_HEADER_NAME="Authorization"
    export AUTH_HEADER_RETURN="true"
+   export SEND_ACCESS_TOKEN_HEADER_NAME="x-auth-access"
    export SEND_BACK_CLAIMS="true"
    export CACHE_TTL=300
    export CLAIMS_CONTAINS=roles=Data.Writer
