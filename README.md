@@ -91,7 +91,7 @@ The server can be configured using the following environment variables:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: auto-rating-adapter
+  name: example-ingress
   annotations:
     nginx.ingress.kubernetes.io/enable-global-auth: false
     nginx.ingress.kubernetes.io/auth-url: http://web-jwks-validator-service.services.svc.cluster.local
