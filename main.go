@@ -116,12 +116,12 @@ func checkIfClaimContainsAllClaimContainsCheck(claims map[string]interface{}, cl
 		parts := strings.Split(claimCheck, "=")
 		if len(parts) != 2 {
 			log.Println("Invalid claim check", claimCheck)
-			continue
+			return false
 		}
 		key, value := parts[0], parts[1]
 		claimValue, exists := claims[key]
 		if !exists {
-			continue
+			return false
 		}
 
 		switch v := claimValue.(type) {
