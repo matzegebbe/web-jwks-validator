@@ -82,6 +82,7 @@ func validateToken(
 				if len(claimContainsCheck) > 0 {
 					if !checkIfClaimContainsAllClaimContainsCheck(claims, claimContainsCheck) {
 						http.Error(w, "Missing required claims from token", http.StatusUnauthorized)
+						return
 					}
 				}
 				if sendAccessTokenBack {
