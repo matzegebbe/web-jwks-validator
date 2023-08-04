@@ -41,7 +41,7 @@ func GetAuthHeaderNameFromEnv() string {
 	return authHeaderName
 }
 
-func GetAccessTokenSettingFromEnv() bool {
+func GetSendBackAccessTokenEnv() bool {
 	sendAccessTokenBackEnv := os.Getenv("AUTH_HEADER_RETURN")
 	sendAccessTokenBack := true
 	if strings.ToLower(sendAccessTokenBackEnv) == "false" {
@@ -49,6 +49,15 @@ func GetAccessTokenSettingFromEnv() bool {
 	}
 	log.Println("AUTH_HEADER_RETURN:", sendAccessTokenBack)
 	return sendAccessTokenBack
+}
+
+func GetSendBackAccessTokenNameEnv() string {
+	authHeaderName := os.Getenv("SEND_ACCESS_TOKEN_HEADER_NAME")
+	if authHeaderName == "" {
+		authHeaderName = "Authorization"
+	}
+	log.Println("SEND_ACCESS_TOKEN_HEADER_NAME:", authHeaderName)
+	return authHeaderName
 }
 
 func GetSendAllClaimsAsJson() bool {

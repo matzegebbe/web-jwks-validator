@@ -32,7 +32,8 @@ func main() {
 	port := GetPortFromEnv()
 	jwksUrl := GetJwksURLFromEnv()
 	authHeaderName := GetAuthHeaderNameFromEnv()
-	sendAccessTokenBack := GetAccessTokenSettingFromEnv()
+	sendAccessTokenBack := GetSendBackAccessTokenEnv()
+	sendAccessTokenBackName := GetSendBackAccessTokenNameEnv()
 	sendAllClaimsAsJson := GetSendAllClaimsAsJson()
 	ttlInSeconds := GetTTLFromEnv()
 	claimContainsCheck := GetClaimContains()
@@ -41,6 +42,7 @@ func main() {
 		jwksUrl,
 		authHeaderName,
 		sendAccessTokenBack,
+		sendAccessTokenBackName,
 		ttlInSeconds,
 		sendAllClaimsAsJson,
 		claimContainsCheck,
@@ -52,6 +54,7 @@ func validateToken(
 	jwksURL string,
 	authHeaderName string,
 	sendAccessTokenBack bool,
+	sendAccessTokenBackName string,
 	ttlInSeconds int,
 	sendAllClaimsAsJson bool,
 	claimContainsCheck []string,
@@ -86,7 +89,7 @@ func validateToken(
 					}
 				}
 				if sendAccessTokenBack {
-					w.Header().Set(authHeaderName, tokenString)
+					w.Header().Set(sendAccessTokenBackName, tokenString)
 				}
 				if sendAllClaimsAsJson {
 					responseJSON, err := json.Marshal(claims)
