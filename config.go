@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"log"
 	"os"
 	"strconv"
 	"strings"
@@ -12,7 +12,7 @@ func GetPathFromEnv() string {
 	if path == "" {
 		path = "/"
 	}
-	fmt.Println("SERVER_PATH:", path)
+	log.Println("SERVER_PATH:", path)
 	return path
 }
 func GetPortFromEnv() string {
@@ -20,7 +20,7 @@ func GetPortFromEnv() string {
 	if port == "" {
 		port = "8080"
 	}
-	fmt.Println("PORT:", port)
+	log.Println("PORT:", port)
 	return port
 }
 func GetJwksURLFromEnv() string {
@@ -28,7 +28,7 @@ func GetJwksURLFromEnv() string {
 	if jwksUrl == "" {
 		jwksUrl = "https://login.windows.net/common/discovery/keys"
 	}
-	fmt.Println("JWKS_URL:", jwksUrl)
+	log.Println("JWKS_URL:", jwksUrl)
 	return jwksUrl
 }
 
@@ -37,7 +37,7 @@ func GetAuthHeaderNameFromEnv() string {
 	if authHeaderName == "" {
 		authHeaderName = "Authorization"
 	}
-	fmt.Println("AUTH_HEADER_NAME:", authHeaderName)
+	log.Println("AUTH_HEADER_NAME:", authHeaderName)
 	return authHeaderName
 }
 
@@ -47,7 +47,7 @@ func GetAccessTokenSettingFromEnv() bool {
 	if strings.ToLower(sendAccessTokenBackEnv) == "false" {
 		sendAccessTokenBack = false
 	}
-	fmt.Println("AUTH_HEADER_RETURN:", sendAccessTokenBack)
+	log.Println("AUTH_HEADER_RETURN:", sendAccessTokenBack)
 	return sendAccessTokenBack
 }
 
@@ -57,8 +57,21 @@ func GetSendAllClaimsAsJson() bool {
 	if strings.ToLower(sendAllClaimsAsJsonEnv) == "false" {
 		sendAllClaimsAsJson = false
 	}
-	fmt.Println("SEND_BACK_CLAIMS:", sendAllClaimsAsJson)
+	log.Println("SEND_BACK_CLAIMS:", sendAllClaimsAsJson)
 	return sendAllClaimsAsJson
+}
+
+func GetClaimContains() []string {
+	claimContainsArr := strings.Split(os.Getenv("CLAIMS_CONTAINS"), ",")
+	if len(claimContainsArr) != 0 {
+		log.Println("CLAIMS_CONTAINS:", claimContainsArr)
+		for i, v := range claimContainsArr {
+			log.Printf("\tclaim %d: value: %s\n", i, v)
+		}
+	} else {
+		log.Println("CLAIMS_CONTAINS NOT CHECKED")
+	}
+	return claimContainsArr
 }
 
 func GetTTLFromEnv() int {
@@ -67,6 +80,6 @@ func GetTTLFromEnv() int {
 	if err != nil {
 		ttlInSeconds = 300 // Default value if conversion fails
 	}
-	fmt.Println("CACHE_TTL:", ttlInSeconds)
+	log.Println("CACHE_TTL:", ttlInSeconds)
 	return ttlInSeconds
 }
