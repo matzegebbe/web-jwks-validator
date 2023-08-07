@@ -71,14 +71,14 @@ func GetSendAllClaimsAsJson() bool {
 }
 
 func GetClaimContains() []string {
+	if os.Getenv("CLAIMS_CONTAINS") == "" {
+		log.Println("CLAIMS CONTAINS check turned off")
+		return []string{}
+	}
 	claimContainsArr := strings.Split(os.Getenv("CLAIMS_CONTAINS"), ",")
-	if len(claimContainsArr) != 0 {
-		log.Println("CLAIMS_CONTAINS:", claimContainsArr)
-		for i, v := range claimContainsArr {
-			log.Printf("\tclaim %d: value: %s\n", i, v)
-		}
-	} else {
-		log.Println("CLAIMS_CONTAINS NOT CHECKED")
+	log.Println("CLAIMS_CONTAINS:", claimContainsArr)
+	for i, v := range claimContainsArr {
+		log.Printf("\tclaim %d: value: %s\n", i, v)
 	}
 	return claimContainsArr
 }
