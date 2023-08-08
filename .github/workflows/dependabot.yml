@@ -1,0 +1,15 @@
+version: 2
+updates:
+  - package-ecosystem: "gomod"
+    directory: "/"
+    commit-message:
+      prefix: "go"
+    schedule:
+      interval: "daily"
+
+  - package-ecosystem: "docker"
+    directory: "/"
+    commit-message:
+      prefix: "docker"
+    schedule:
+      interval: "daily"
