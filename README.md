@@ -27,7 +27,7 @@ feature of `ingress-nginx`.
 1. Download or clone this repository.
 
    ```bash
-   git clone https://github.com/your-github-username/web-jwks-validator.git
+   git clone https://github.com/matzegebbe/web-jwks-validator.git
    ```
 
 2. Go to the project directory.
