@@ -27,8 +27,8 @@ release:
 
 dockers:
   - image_templates:
-      - "ghcr.io/${{ github.repository }}:latest"
-      - "ghcr.io/${{ github.repository }}:{{ .Tag }}"
+      - "ghcr.io/matzegebbe/web-jwks-validator:latest"
+      - "ghcr.io/matzegebbe/web-jwks-validator:{{ .Version }}"
     build_flag_templates:
       - "--label=org.opencontainers.image.created={{.Date}}"
       - "--label=org.opencontainers.image.title={{.ProjectName}}"
