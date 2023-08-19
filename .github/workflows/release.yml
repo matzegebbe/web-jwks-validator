@@ -27,19 +27,14 @@ jobs:
           push: true
           tags: ghcr.io/${{ github.repository }}:${GITHUB_REF#refs/tags/}
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
+      - name: Set up Go
+        uses: actions/setup-go@v4
+
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v4
         with:
-          node-version: '14' 
-
-      - name: Generate changelog
-        run: npx standard-version --skip.commit --skip.tag
-
-      - name: Create GitHub Release
-        uses: github/create-release@v1
+          distribution: goreleaser
+          version: latest
+          args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
-          body_path: CHANGELOG.md
