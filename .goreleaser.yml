@@ -24,12 +24,3 @@ archives:
 release:
   draft: false
   prerelease: false
-
-dockers:
-  - image_templates:
-      - "ghcr.io/matzegebbe/web-jwks-validator:latest"
-      - "ghcr.io/matzegebbe/web-jwks-validator:{{ .Version }}"
-    build_flag_templates:
-      - "--label=org.opencontainers.image.created={{.Date}}"
-      - "--label=org.opencontainers.image.title={{.ProjectName}}"
-      - "--label=org.opencontainers.image.version={{.Version}}"
