@@ -25,9 +25,13 @@ type CustomClaims struct {
 
 var (
 	jwksCache = Cache{}
+	version   = "dev"
+	commit    = "none"
+	date      = "unknown"
 )
 
 func main() {
+	log.Printf("VERSION %s, COMMIT %s, BUILD AT %s", version, commit, date)
 
 	port := GetPortFromEnv()
 	jwksUrl := GetJwksURLFromEnv()
