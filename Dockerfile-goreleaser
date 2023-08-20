@@ -1,0 +1,3 @@
+FROM scratch
+COPY web-jwks-validator /
+ENTRYPOINT ["/web-jwks-validator"]
