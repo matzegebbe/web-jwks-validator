@@ -1,3 +1,4 @@
 FROM scratch
 COPY web-jwks-validator /
+RUN apk --no-cache add ca-certificates
 ENTRYPOINT ["/web-jwks-validator"]
