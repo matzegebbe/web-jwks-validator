@@ -3,7 +3,9 @@ name: Build and Push Docker Image
 on:
   push:
     branches:
-      - main
+      - '**'
+    tags-ignore:
+      - '*'
 
 jobs:
   build:
@@ -12,6 +14,17 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '^1.21'
+
+      - name: Install dependencies
+        run: go mod download
+
+      - name: Test Go application
+        run: go test ./...
 
       - name: Docker Login
         uses: docker/login-action@v3.0.0
