@@ -33,9 +33,12 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Set environment variable
+        run: echo "IMAGE_TAG=$(echo ${{ github.ref_name }} | sed 's/\//-/g')" >> $GITHUB_ENV
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
-          tags: ghcr.io/${{ github.repository }}:${{ github.ref_name }}-${{ github.run_id }}
+          tags: ghcr.io/${{ github.repository }}:${{ env.IMAGE_TAG }}-${{ github.run_id }}
