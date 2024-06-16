@@ -29,23 +29,3 @@ archives:
     files:
       - none*
 
-release:
-  draft: false
-  prerelease: false
-
-dockers:
-  - id: linux-amd64
-    goos: linux
-    goarch: amd64
-    dockerfile: Dockerfile-goreleaser
-    build_flag_templates:
-      - "--pull"
-      - "--label=org.opencontainers.image.created={{ .Date }}"
-      - "--label=org.opencontainers.image.name={{ .ProjectName }}"
-      - "--label=org.opencontainers.image.revision={{ .FullCommit }}"
-      - "--label=org.opencontainers.image.version={{ .Version }}"
-      - "--label=org.opencontainers.image.source={{ .GitURL }}"
-      - "--platform=linux/amd64"
-    image_templates:
-      - "ghcr.io/matzegebbe/web-jwks-validator:v{{ .Version }}"
-
