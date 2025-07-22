@@ -37,15 +37,18 @@ func TestCheckIfClaimContainsAllClaimContainsCheck(t *testing.T) {
 			},
 			claimContainsCheck: []string{"name=John", "tags=admin"},
 			expectedResult:     false,
-			description:        "Case 2: Expected to return false",
+			description:        "Case 3: Expected to return false",
 		},
 	}
 
 	for _, tc := range testCases {
-		result := checkIfClaimContainsAllClaimContainsCheck(tc.claims, tc.claimContainsCheck)
-		if result != tc.expectedResult {
-			t.Errorf("%s: checkIfClaimContainsAllClaimContainsCheck() = %v;"+
-				"want %v", tc.description, result, tc.expectedResult)
-		}
+		tc := tc
+		t.Run(tc.description, func(t *testing.T) {
+			result := checkIfClaimContainsAllClaimContainsCheck(tc.claims, tc.claimContainsCheck)
+			if result != tc.expectedResult {
+				t.Errorf("%s: checkIfClaimContainsAllClaimContainsCheck() = %v;"+
+					"want %v", tc.description, result, tc.expectedResult)
+			}
+		})
 	}
 }
