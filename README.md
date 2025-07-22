@@ -73,16 +73,16 @@ The server can be configured using the following environment variables:
   (default *https://login.windows.net/common/discovery/keys*)
 - `AUTH_HEADER_NAME`: the name of the header field that contains the JWT
   (default *Authorization*)
-- `SEND_ACCESS_TOKEN_BACK`: if set to true, the validated access token will be included in the response headers
+- `AUTH_HEADER_RETURN`: if set to true, the validated access token will be included in the response headers
   (default *true*)
-- `SEND_ACCESS_TOKEN_HEADER_NAME`: if SEND_ACCESS_TOKEN_BACK is on this header will be used to send the token back
-  this can be useful if the downstream application needs to token as well
+- `SEND_ACCESS_TOKEN_HEADER_NAME`: if AUTH_HEADER_RETURN is on this header will be used to send the token back
+  this can be useful if the downstream application needs the token as well
   (default *Authorization*)
-- `SEND_ALL_CLAIMS_AS_JSON`: if set to true, all claims from the JWT will be returned as JSON in the response
+- `SEND_BACK_CLAIMS`: if set to true, all claims from the JWT will be returned as JSON in the response
   (default *true*)
-- `TTL_IN_SECONDS`: defines how long JWKS should be cached
+- `CACHE_TTL`: defines how long JWKS should be cached
   (default *300*)
-- `CLAIM_CONTAINS`: a comma-separated list of required claim key=value pairs
+- `CLAIMS_CONTAINS`: a comma-separated list of required claim key=value pairs
   (default *""* - not checked )
 
 ## ingress-nginx check
