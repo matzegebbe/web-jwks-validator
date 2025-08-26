@@ -163,6 +163,14 @@ spec:
       targetPort: 8080
 ```
 
+## Test
+
+There is a small [test_call bash script](misc/test_call.sh) for testing against a Microsoft App Registration.
+
+```bash
+./get-token.sh <CLIENT_ID> <CLIENT_SECRET> <TENANT_ID>
+```
+
 ## License
 
 This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
