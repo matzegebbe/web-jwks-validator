@@ -48,5 +48,6 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: ghcr.io/${{ github.repository }}:${{ env.IMAGE_TAG }}-${{ github.run_id }}
-
+          tags: |
+            ghcr.io/${{ github.repository }}:${{ env.IMAGE_TAG }}-${{ github.run_id }}
+            ghcr.io/${{ github.repository }}:${{ env.IMAGE_TAG }}

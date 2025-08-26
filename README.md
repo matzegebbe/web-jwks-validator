@@ -63,6 +63,21 @@ feature of `ingress-nginx`.
 docker build . -t web-jwks-validator
 ```
 
+## docker run
+
+```bash
+docker run --rm -p 8080:8080 \
+  -e PORT=8080 \
+  -e JWKS_URL="https://login.windows.net/common/discovery/keys" \
+  -e AUTH_HEADER_NAME="Authorization" \
+  -e AUTH_HEADER_RETURN="true" \
+  -e SEND_ACCESS_TOKEN_HEADER_NAME="x-auth-access" \
+  -e SEND_BACK_CLAIMS="true" \
+  -e CACHE_TTL=300 \
+  -e CLAIMS_CONTAINS="roles=Data.Writer" \
+  ghcr.io/matzegebbe/web-jwks-validator:main
+```
+
 ## Configuration
 
 The server can be configured using the following environment variables:
