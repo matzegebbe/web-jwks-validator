@@ -1,4 +1,4 @@
-FROM alpine:3.23.0
+FROM alpine:3.23.2
 COPY web-jwks-validator /
 RUN apk --no-cache add ca-certificates
 ENTRYPOINT ["/web-jwks-validator"]
