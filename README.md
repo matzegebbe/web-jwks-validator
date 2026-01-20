@@ -75,7 +75,7 @@ docker run --rm -p 8080:8080 \
   -e SEND_BACK_CLAIMS="true" \
   -e CACHE_TTL=300 \
   -e CLAIMS_CONTAINS="roles=Data.Writer" \
-  ghcr.io/matzegebbe/web-jwks-validator:main
+  ghcr.io/matzegebbe/web-jwks-validator:v0.0.12
 ```
 
 ## Configuration
@@ -151,7 +151,7 @@ spec:
     spec:
       containers:
         - name: web-jwks-validator
-          image: ghcr.io/matzegebbe/web-jwks-validator:main-5767335050
+          image: ghcr.io/matzegebbe/web-jwks-validator:v0.0.12
           ports:
             - containerPort: 8080
           env:
