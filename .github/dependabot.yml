@@ -3,21 +3,49 @@ updates:
 
   - package-ecosystem: "github-actions"
     directory: "/"
-    commit-message:
-      prefix: "chore(deps)"
     schedule:
-      interval: "weekly"
+      interval: "daily"
+      time: "07:00"
+      timezone: "Europe/Berlin"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "feat"
+      include: "scope"
+    labels: ["dependencies", "ci"]
 
   - package-ecosystem: "gomod"
     directory: "/"
-    commit-message:
-      prefix: "chore(deps)"
     schedule:
       interval: "daily"
+      time: "07:05"
+      timezone: "Europe/Berlin"
+    open-pull-requests-limit: 10
+    labels: ["dependencies"]
+    commit-message:
+      prefix: "feat"
+      include: "scope"
+    groups:
+      go-patch:
+        applies-to: version-updates
+        patterns: ["*"]
+        update-types: ["patch"]
+      go-minor:
+        applies-to: version-updates
+        patterns: ["*"]
+        update-types: ["minor"]
+      go-major:
+        applies-to: version-updates
+        patterns: ["*"]
+        update-types: ["major"]
 
   - package-ecosystem: "docker"
     directory: "/"
-    commit-message:
-      prefix: "chore(deps)"
     schedule:
       interval: "daily"
+      time: "07:10"
+      timezone: "Europe/Berlin"
+    labels: ["dependencies", "docker"]
+    commit-message:
+      prefix: "feat"
+      include: "scope"
+    open-pull-requests-limit: 5
