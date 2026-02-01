@@ -1,4 +1,6 @@
-FROM alpine:3.23.2
+FROM alpine:3.21
+RUN apk --no-cache add ca-certificates && \
+    adduser -D -u 1000 appuser
 COPY web-jwks-validator /
-RUN apk --no-cache add ca-certificates
+USER appuser
 ENTRYPOINT ["/web-jwks-validator"]
