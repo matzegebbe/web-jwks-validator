@@ -43,6 +43,8 @@ func main() {
 	sendAllClaimsAsJson := GetSendAllClaimsAsJson()
 	ttlInSeconds := GetTTLFromEnv()
 	claimContainsCheck := GetClaimContains()
+	expectedIssuer := GetExpectedIssuer()
+	expectedAudience := GetExpectedAudience()
 
 	http.HandleFunc(GetPathFromEnv(), validateToken(
 		jwksUrl,
@@ -52,6 +54,8 @@ func main() {
 		ttlInSeconds,
 		sendAllClaimsAsJson,
 		claimContainsCheck,
+		expectedIssuer,
+		expectedAudience,
 	))
 
 	server := &http.Server{
@@ -70,6 +74,8 @@ func validateToken(
 	ttlInSeconds int,
 	sendAllClaimsAsJson bool,
 	claimContainsCheck []string,
+	expectedIssuer string,
+	expectedAudience string,
 ) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		tokenString := extractToken(r, authHeaderName)
@@ -95,10 +101,19 @@ func validateToken(
 		for _, key := range keys.Keys {
 			err = token.Claims(key, &claims, &standardClaims)
 			if err == nil {
-				// Validate time-based claims (exp, nbf, iat)
-				err = standardClaims.Validate(jwt.Expected{Time: time.Now()})
+				// Build expected claims for validation
+				expected := jwt.Expected{Time: time.Now()}
+				if expectedIssuer != "" {
+					expected.Issuer = expectedIssuer
+				}
+				if expectedAudience != "" {
+					expected.Audience = jwt.Audience{expectedAudience}
+				}
+
+				// Validate time-based claims (exp, nbf, iat) and optionally issuer/audience
+				err = standardClaims.Validate(expected)
 				if err != nil {
-					http.Error(w, "Token expired or not yet valid", http.StatusUnauthorized)
+					http.Error(w, "Token validation failed", http.StatusUnauthorized)
 					return
 				}
 				if len(claimContainsCheck) > 0 {

@@ -92,3 +92,23 @@ func GetTTLFromEnv() int {
 	log.Println("CACHE_TTL:", ttlInSeconds)
 	return ttlInSeconds
 }
+
+func GetExpectedIssuer() string {
+	issuer := os.Getenv("EXPECTED_ISSUER")
+	if issuer != "" {
+		log.Println("EXPECTED_ISSUER:", issuer)
+	} else {
+		log.Println("EXPECTED_ISSUER: (not configured)")
+	}
+	return issuer
+}
+
+func GetExpectedAudience() string {
+	audience := os.Getenv("EXPECTED_AUDIENCE")
+	if audience != "" {
+		log.Println("EXPECTED_AUDIENCE:", audience)
+	} else {
+		log.Println("EXPECTED_AUDIENCE: (not configured)")
+	}
+	return audience
+}
