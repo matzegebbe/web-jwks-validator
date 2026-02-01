@@ -2,6 +2,8 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"strings"
@@ -218,15 +220,24 @@ func getJwksWithCache(jwksURL string, ttlInSeconds int) (*jose.JSONWebKeySet, er
 	return jwksCache.jwks, nil
 }
 
+var httpClient = &http.Client{Timeout: 10 * time.Second}
+
+const maxJWKSResponseSize = 1024 * 1024 // 1MB
+
 func getJwks(jwksURL string) (*jose.JSONWebKeySet, error) {
-	resp, err := http.Get(jwksURL)
+	resp, err := httpClient.Get(jwksURL)
 	if err != nil {
 		return nil, err
 	}
 	defer resp.Body.Close()
 
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("JWKS fetch failed with status: %d", resp.StatusCode)
+	}
+
 	var jwks = new(jose.JSONWebKeySet)
-	err = json.NewDecoder(resp.Body).Decode(jwks)
+	limitedReader := io.LimitReader(resp.Body, maxJWKSResponseSize)
+	err = json.NewDecoder(limitedReader).Decode(jwks)
 
 	return jwks, err
 }
