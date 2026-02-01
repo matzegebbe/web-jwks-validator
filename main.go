@@ -52,7 +52,13 @@ func main() {
 		claimContainsCheck,
 	))
 
-	http.ListenAndServe(":"+port, nil)
+	server := &http.Server{
+		Addr:         ":" + port,
+		ReadTimeout:  10 * time.Second,
+		WriteTimeout: 10 * time.Second,
+		IdleTimeout:  120 * time.Second,
+	}
+	log.Fatal(server.ListenAndServe())
 }
 func validateToken(
 	jwksURL string,
