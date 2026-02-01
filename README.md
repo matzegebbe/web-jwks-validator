@@ -200,10 +200,51 @@ spec:
 
 ## Test
 
-There is a small [test_call bash script](misc/test_call.sh) for testing against a Microsoft App Registration.
+### Quick Test with Duende Demo (No Setup Required)
+
+The easiest way to test the validator is using the public [Duende IdentityServer demo](https://demo.duendesoftware.com). No credentials or setup required.
+
+**1. Start the validator with Docker:**
 
 ```bash
-./get-token.sh <CLIENT_ID> <CLIENT_SECRET> <TENANT_ID>
+docker run --rm -p 8080:8080 \
+  -e JWKS_URL="https://demo.duendesoftware.com/.well-known/openid-configuration/jwks" \
+  ghcr.io/matzegebbe/web-jwks-validator:main
+```
+
+**2. Run the test script:**
+
+```bash
+./misc/test_duende_demo.sh
+```
+
+Or test manually with curl:
+
+```bash
+# Get a token from the Duende demo
+TOKEN=$(curl -s -X POST https://demo.duendesoftware.com/connect/token \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "client_id=m2m&client_secret=secret&grant_type=client_credentials&scope=api" \
+  | jq -r '.access_token')
+
+# Test against the validator
+curl -H "Authorization: Bearer $TOKEN" http://localhost:8080/
+```
+
+**All-in-one Docker test command:**
+
+```bash
+./misc/all_in_one_demo.sh
+```
+
+This script starts the validator in Docker, fetches a token from Duende, tests the validation, and cleans up automatically.
+
+### Test with Microsoft App Registration
+
+For testing against Azure AD, use the [test_call bash script](misc/test_call.sh):
+
+```bash
+./misc/test_call.sh <CLIENT_ID> <CLIENT_SECRET> <TENANT_ID>
 ```
 
 ## License
