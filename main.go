@@ -91,9 +91,16 @@ func validateToken(
 		}
 
 		claims := make(map[string]interface{})
+		var standardClaims jwt.Claims
 		for _, key := range keys.Keys {
-			err = token.Claims(key, &claims)
+			err = token.Claims(key, &claims, &standardClaims)
 			if err == nil {
+				// Validate time-based claims (exp, nbf, iat)
+				err = standardClaims.Validate(jwt.Expected{Time: time.Now()})
+				if err != nil {
+					http.Error(w, "Token expired or not yet valid", http.StatusUnauthorized)
+					return
+				}
 				if len(claimContainsCheck) > 0 {
 					if !checkIfClaimContainsAllClaimContainsCheck(claims, claimContainsCheck) {
 						http.Error(w, "Missing required claims from token", http.StatusUnauthorized)
