@@ -28,6 +28,9 @@ export SEND_ACCESS_TOKEN_HEADER_NAME="x-auth-access"
 export SEND_BACK_CLAIMS="true"
 export CACHE_TTL=300
 export CLAIMS_CONTAINS="roles=Data.Writer"
+# Optional: validate issuer and audience
+# export EXPECTED_ISSUER="https://login.microsoftonline.com/{tenant-id}/v2.0"
+# export EXPECTED_AUDIENCE="your-client-id"
 ./web-jwks-validator
 ```
 

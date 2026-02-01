@@ -2,6 +2,8 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"strings"
@@ -41,6 +43,8 @@ func main() {
 	sendAllClaimsAsJson := GetSendAllClaimsAsJson()
 	ttlInSeconds := GetTTLFromEnv()
 	claimContainsCheck := GetClaimContains()
+	expectedIssuer := GetExpectedIssuer()
+	expectedAudience := GetExpectedAudience()
 
 	http.HandleFunc(GetPathFromEnv(), validateToken(
 		jwksUrl,
@@ -50,9 +54,17 @@ func main() {
 		ttlInSeconds,
 		sendAllClaimsAsJson,
 		claimContainsCheck,
+		expectedIssuer,
+		expectedAudience,
 	))
 
-	http.ListenAndServe(":"+port, nil)
+	server := &http.Server{
+		Addr:         ":" + port,
+		ReadTimeout:  10 * time.Second,
+		WriteTimeout: 10 * time.Second,
+		IdleTimeout:  120 * time.Second,
+	}
+	log.Fatal(server.ListenAndServe())
 }
 func validateToken(
 	jwksURL string,
@@ -62,6 +74,8 @@ func validateToken(
 	ttlInSeconds int,
 	sendAllClaimsAsJson bool,
 	claimContainsCheck []string,
+	expectedIssuer string,
+	expectedAudience string,
 ) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		tokenString := extractToken(r, authHeaderName)
@@ -83,9 +97,25 @@ func validateToken(
 		}
 
 		claims := make(map[string]interface{})
+		var standardClaims jwt.Claims
 		for _, key := range keys.Keys {
-			err = token.Claims(key, &claims)
+			err = token.Claims(key, &claims, &standardClaims)
 			if err == nil {
+				// Build expected claims for validation
+				expected := jwt.Expected{Time: time.Now()}
+				if expectedIssuer != "" {
+					expected.Issuer = expectedIssuer
+				}
+				if expectedAudience != "" {
+					expected.Audience = jwt.Audience{expectedAudience}
+				}
+
+				// Validate time-based claims (exp, nbf, iat) and optionally issuer/audience
+				err = standardClaims.Validate(expected)
+				if err != nil {
+					http.Error(w, "Token validation failed", http.StatusUnauthorized)
+					return
+				}
 				if len(claimContainsCheck) > 0 {
 					if !checkIfClaimContainsAllClaimContainsCheck(claims, claimContainsCheck) {
 						http.Error(w, "Missing required claims from token", http.StatusUnauthorized)
@@ -212,15 +242,24 @@ func getJwksWithCache(jwksURL string, ttlInSeconds int) (*jose.JSONWebKeySet, er
 	return jwksCache.jwks, nil
 }
 
+var httpClient = &http.Client{Timeout: 10 * time.Second}
+
+const maxJWKSResponseSize = 1024 * 1024 // 1MB
+
 func getJwks(jwksURL string) (*jose.JSONWebKeySet, error) {
-	resp, err := http.Get(jwksURL)
+	resp, err := httpClient.Get(jwksURL)
 	if err != nil {
 		return nil, err
 	}
 	defer resp.Body.Close()
 
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("JWKS fetch failed with status: %d", resp.StatusCode)
+	}
+
 	var jwks = new(jose.JSONWebKeySet)
-	err = json.NewDecoder(resp.Body).Decode(jwks)
+	limitedReader := io.LimitReader(resp.Body, maxJWKSResponseSize)
+	err = json.NewDecoder(limitedReader).Decode(jwks)
 
 	return jwks, err
 }

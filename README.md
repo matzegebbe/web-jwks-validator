@@ -18,7 +18,10 @@ feature of `ingress-nginx`.
 ## Features
 
 - JWKS fetching with cache
-- JWT validation with claims checking
+- JWT validation with signature verification
+- Token expiration validation (exp, nbf, iat claims)
+- Optional issuer and audience validation
+- Custom claims checking
 - Environment variables for configuration
 - JWT claim details in the response (optional)
 
@@ -54,6 +57,9 @@ feature of `ingress-nginx`.
    export SEND_BACK_CLAIMS="true"
    export CACHE_TTL=300
    export CLAIMS_CONTAINS=roles=Data.Writer
+   # Optional: validate issuer and audience
+   # export EXPECTED_ISSUER="https://login.microsoftonline.com/{tenant-id}/v2.0"
+   # export EXPECTED_AUDIENCE="your-client-id"
    ./web-jwks-validator
    ```
 
@@ -75,6 +81,8 @@ docker run --rm -p 8080:8080 \
   -e SEND_BACK_CLAIMS="true" \
   -e CACHE_TTL=300 \
   -e CLAIMS_CONTAINS="roles=Data.Writer" \
+  -e EXPECTED_ISSUER="https://login.microsoftonline.com/{tenant-id}/v2.0" \
+  -e EXPECTED_AUDIENCE="your-client-id" \
   ghcr.io/matzegebbe/web-jwks-validator:main
 ```
 
@@ -82,23 +90,30 @@ docker run --rm -p 8080:8080 \
 
 The server can be configured using the following environment variables:
 
-- `PORT`: the port the server should run on
-  (default *8080*)
-- `JWKS_URL`: the URL from where the JWKS should be fetched
-  (default *https://login.windows.net/common/discovery/keys*)
-- `AUTH_HEADER_NAME`: the name of the header field that contains the JWT
-  (default *Authorization*)
-- `SEND_ACCESS_TOKEN_BACK`: if set to true, the validated access token will be included in the response headers
-  (default *true*)
-- `SEND_ACCESS_TOKEN_HEADER_NAME`: if SEND_ACCESS_TOKEN_BACK is on this header will be used to send the token back
-  this can be useful if the downstream application needs to token as well
-  (default *Authorization*)
-- `SEND_ALL_CLAIMS_AS_JSON`: if set to true, all claims from the JWT will be returned as JSON in the response
-  (default *true*)
-- `TTL_IN_SECONDS`: defines how long JWKS should be cached
-  (default *300*)
-- `CLAIM_CONTAINS`: a comma-separated list of required claim key=value pairs
-  (default *""* - not checked )
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `PORT` | The port the server should run on | `8080` |
+| `SERVER_PATH` | The HTTP path to listen on | `/` |
+| `JWKS_URL` | The URL from where the JWKS should be fetched (must be HTTPS in production) | `https://login.windows.net/common/discovery/keys` |
+| `AUTH_HEADER_NAME` | The name of the header field that contains the JWT | `Authorization` |
+| `AUTH_HEADER_RETURN` | If set to true, the validated access token will be included in the response headers | `true` |
+| `SEND_ACCESS_TOKEN_HEADER_NAME` | If AUTH_HEADER_RETURN is on, this header will be used to send the token back (useful if downstream needs the token) | `Authorization` |
+| `SEND_BACK_CLAIMS` | If set to true, all claims from the JWT will be returned as JSON in the response | `true` |
+| `CACHE_TTL` | Defines how long JWKS should be cached in seconds | `300` |
+| `CLAIMS_CONTAINS` | A comma-separated list of required claim key=value pairs | *(not checked)* |
+| `EXPECTED_ISSUER` | If set, validates that the token's `iss` claim matches this value | *(not checked)* |
+| `EXPECTED_AUDIENCE` | If set, validates that the token's `aud` claim matches this value | *(not checked)* |
+
+### Security Validation
+
+The validator performs the following checks on each token:
+
+1. **Signature verification** - Token must be signed by a key from the JWKS
+2. **Expiration check** - Token must not be expired (`exp` claim)
+3. **Not before check** - Token must be valid for use (`nbf` claim)
+4. **Issuer validation** - If `EXPECTED_ISSUER` is set, the `iss` claim must match
+5. **Audience validation** - If `EXPECTED_AUDIENCE` is set, the `aud` claim must match
+6. **Custom claims** - If `CLAIMS_CONTAINS` is set, all specified claims must be present with matching values
 
 ## ingress-nginx check
 
@@ -157,6 +172,11 @@ spec:
           env:
             - name: JWKS_URL
               value: https://login.microsoftonline.com/common/discovery/v2.0/keys
+            # Optional: validate issuer and audience for additional security
+            # - name: EXPECTED_ISSUER
+            #   value: https://login.microsoftonline.com/{tenant-id}/v2.0
+            # - name: EXPECTED_AUDIENCE
+            #   value: your-client-id
           resources:
            requests:
             cpu: "100m"
@@ -180,10 +200,51 @@ spec:
 
 ## Test
 
-There is a small [test_call bash script](misc/test_call.sh) for testing against a Microsoft App Registration.
+### Quick Test with Duende Demo (No Setup Required)
+
+The easiest way to test the validator is using the public [Duende IdentityServer demo](https://demo.duendesoftware.com). No credentials or setup required.
+
+**1. Start the validator with Docker:**
 
 ```bash
-./get-token.sh <CLIENT_ID> <CLIENT_SECRET> <TENANT_ID>
+docker run --rm -p 8080:8080 \
+  -e JWKS_URL="https://demo.duendesoftware.com/.well-known/openid-configuration/jwks" \
+  ghcr.io/matzegebbe/web-jwks-validator:main
+```
+
+**2. Run the test script:**
+
+```bash
+./misc/test_duende_demo.sh
+```
+
+Or test manually with curl:
+
+```bash
+# Get a token from the Duende demo
+TOKEN=$(curl -s -X POST https://demo.duendesoftware.com/connect/token \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "client_id=m2m&client_secret=secret&grant_type=client_credentials&scope=api" \
+  | jq -r '.access_token')
+
+# Test against the validator
+curl -H "Authorization: Bearer $TOKEN" http://localhost:8080/
+```
+
+**All-in-one Docker test command:**
+
+```bash
+./misc/all_in_one_demo.sh
+```
+
+This script starts the validator in Docker, fetches a token from Duende, tests the validation, and cleans up automatically.
+
+### Test with Microsoft App Registration
+
+For testing against Azure AD, use the [test_call bash script](misc/test_call.sh):
+
+```bash
+./misc/test_call.sh <CLIENT_ID> <CLIENT_SECRET> <TENANT_ID>
 ```
 
 ## License

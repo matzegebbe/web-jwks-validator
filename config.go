@@ -28,6 +28,10 @@ func GetJwksURLFromEnv() string {
 	if jwksUrl == "" {
 		jwksUrl = "https://login.windows.net/common/discovery/keys"
 	}
+	// Warn if JWKS URL is not using HTTPS (insecure)
+	if !strings.HasPrefix(jwksUrl, "https://") {
+		log.Println("WARNING: JWKS_URL is not using HTTPS - this is insecure and vulnerable to MITM attacks")
+	}
 	log.Println("JWKS_URL:", jwksUrl)
 	return jwksUrl
 }
@@ -91,4 +95,24 @@ func GetTTLFromEnv() int {
 	}
 	log.Println("CACHE_TTL:", ttlInSeconds)
 	return ttlInSeconds
+}
+
+func GetExpectedIssuer() string {
+	issuer := os.Getenv("EXPECTED_ISSUER")
+	if issuer != "" {
+		log.Println("EXPECTED_ISSUER:", issuer)
+	} else {
+		log.Println("EXPECTED_ISSUER: (not configured)")
+	}
+	return issuer
+}
+
+func GetExpectedAudience() string {
+	audience := os.Getenv("EXPECTED_AUDIENCE")
+	if audience != "" {
+		log.Println("EXPECTED_AUDIENCE:", audience)
+	} else {
+		log.Println("EXPECTED_AUDIENCE: (not configured)")
+	}
+	return audience
 }
