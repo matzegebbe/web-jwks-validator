@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/matzegebbe/web-jwks-validator/compare/v0.2.0...v0.3.0) (2026-02-11)
+
+
+### Features
+
+* **deps:** bump golang from 1.25-alpine to 1.26-alpine ([#82](https://github.com/matzegebbe/web-jwks-validator/issues/82)) ([20b2852](https://github.com/matzegebbe/web-jwks-validator/commit/20b2852e4da448fd1a69a5651b8396d61f6af278))
+
 ## [0.2.0](https://github.com/matzegebbe/web-jwks-validator/compare/v0.1.0...v0.2.0) (2026-02-01)
 
 
