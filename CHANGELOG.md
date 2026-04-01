@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.4.0](https://github.com/matzegebbe/web-jwks-validator/compare/v0.3.0...v0.4.0) (2026-04-01)
+
+
+### Features
+
+* **deps:** bump docker/build-push-action from 6 to 7 ([#89](https://github.com/matzegebbe/web-jwks-validator/issues/89)) ([b81842e](https://github.com/matzegebbe/web-jwks-validator/commit/b81842e679201d83aabeec6376dab4ed1b346de7))
+* **deps:** bump docker/login-action from 3.7.0 to 4.0.0 ([#86](https://github.com/matzegebbe/web-jwks-validator/issues/86)) ([28d4103](https://github.com/matzegebbe/web-jwks-validator/commit/28d410332970592d85b6c46e15348ec1a4536708))
+* **deps:** bump docker/setup-buildx-action from 3 to 4 ([#88](https://github.com/matzegebbe/web-jwks-validator/issues/88)) ([f9e3d77](https://github.com/matzegebbe/web-jwks-validator/commit/f9e3d77b213615f28f2835160208b424809659b0))
+* **deps:** bump docker/setup-qemu-action from 3 to 4 ([#87](https://github.com/matzegebbe/web-jwks-validator/issues/87)) ([77576a3](https://github.com/matzegebbe/web-jwks-validator/commit/77576a3ba3bdfc5074249074f974a1b4857a75b1))
+* **deps:** bump github.com/go-jose/go-jose/v3 in the go-patch group ([#90](https://github.com/matzegebbe/web-jwks-validator/issues/90)) ([c290c88](https://github.com/matzegebbe/web-jwks-validator/commit/c290c88bac79a143589745df15770d2f3927f51a))
+* **deps:** bump goreleaser/goreleaser-action from 6 to 7 ([#84](https://github.com/matzegebbe/web-jwks-validator/issues/84)) ([d657925](https://github.com/matzegebbe/web-jwks-validator/commit/d657925c68d8ec05b0d66e6fee1f9d45e57bcdad))
+
+
+### Bug Fixes
+
+* disable body and footer max line length in commitlint ([#91](https://github.com/matzegebbe/web-jwks-validator/issues/91)) ([14c5273](https://github.com/matzegebbe/web-jwks-validator/commit/14c5273eed6ccd6ebefb657d9ee8c7c31e3d1dd9))
+
 ## [0.3.0](https://github.com/matzegebbe/web-jwks-validator/compare/v0.2.0...v0.3.0) (2026-02-11)
 
 
