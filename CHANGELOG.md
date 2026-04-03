@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.0](https://github.com/matzegebbe/web-jwks-validator/compare/v0.4.0...v0.5.0) (2026-04-03)
+
+
+### Features
+
+* **deps:** bump docker/login-action from 4.0.0 to 4.1.0 ([#92](https://github.com/matzegebbe/web-jwks-validator/issues/92)) ([b882b19](https://github.com/matzegebbe/web-jwks-validator/commit/b882b1961dc60ed356a4a70e7e4d4c5eecf45adb))
+
 ## [0.4.0](https://github.com/matzegebbe/web-jwks-validator/compare/v0.3.0...v0.4.0) (2026-04-01)
 
 
