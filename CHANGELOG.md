@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.6.0](https://github.com/matzegebbe/web-jwks-validator/compare/v0.5.0...v0.6.0) (2026-06-19)
+
+
+### Features
+
+* **deps:** bump actions/checkout from 6 to 7 ([#98](https://github.com/matzegebbe/web-jwks-validator/issues/98)) ([f90e4fd](https://github.com/matzegebbe/web-jwks-validator/commit/f90e4fd2b9e20511f82bfcbd4569de6d60dc99dc))
+* **deps:** bump alpine from 3.23 to 3.24 ([#97](https://github.com/matzegebbe/web-jwks-validator/issues/97)) ([35691cb](https://github.com/matzegebbe/web-jwks-validator/commit/35691cbb100f9c781a9b4f749ae1385960f84911))
+* **deps:** bump docker/login-action from 4.1.0 to 4.2.0 ([#95](https://github.com/matzegebbe/web-jwks-validator/issues/95)) ([39b1058](https://github.com/matzegebbe/web-jwks-validator/commit/39b1058b3b4b75c2d60d7e537f9568d4041e8dff))
+
 ## [0.5.0](https://github.com/matzegebbe/web-jwks-validator/compare/v0.4.0...v0.5.0) (2026-04-23)
 
 
