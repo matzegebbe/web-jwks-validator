@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.6.0](https://github.com/matzegebbe/web-jwks-validator/compare/v0.5.0...v0.6.0) (2026-07-24)
+
+
+### Features
+
+* **deps:** bump actions/checkout from 6 to 7 ([#98](https://github.com/matzegebbe/web-jwks-validator/issues/98)) ([f90e4fd](https://github.com/matzegebbe/web-jwks-validator/commit/f90e4fd2b9e20511f82bfcbd4569de6d60dc99dc))
+* **deps:** bump actions/setup-go from 6 to 7 ([#102](https://github.com/matzegebbe/web-jwks-validator/issues/102)) ([8332a69](https://github.com/matzegebbe/web-jwks-validator/commit/8332a691f81bdb65593ca7f452ad72df7c20c030))
+* **deps:** bump alpine from 3.23 to 3.24 ([#97](https://github.com/matzegebbe/web-jwks-validator/issues/97)) ([35691cb](https://github.com/matzegebbe/web-jwks-validator/commit/35691cbb100f9c781a9b4f749ae1385960f84911))
+* **deps:** bump docker/login-action from 4.1.0 to 4.2.0 ([#95](https://github.com/matzegebbe/web-jwks-validator/issues/95)) ([39b1058](https://github.com/matzegebbe/web-jwks-validator/commit/39b1058b3b4b75c2d60d7e537f9568d4041e8dff))
+* **deps:** bump docker/login-action from 4.2.0 to 4.3.0 ([#99](https://github.com/matzegebbe/web-jwks-validator/issues/99)) ([5d7f345](https://github.com/matzegebbe/web-jwks-validator/commit/5d7f34554c304fd894bee74890f9359c74c1bc3c))
+* **deps:** bump docker/login-action from 4.3.0 to 4.4.0 ([#100](https://github.com/matzegebbe/web-jwks-validator/issues/100)) ([6766362](https://github.com/matzegebbe/web-jwks-validator/commit/6766362ee24fae21af5444a00b1a2f5ef97c4d66))
+* **deps:** bump docker/login-action from 4.4.0 to 4.5.0 ([#103](https://github.com/matzegebbe/web-jwks-validator/issues/103)) ([415d36e](https://github.com/matzegebbe/web-jwks-validator/commit/415d36ebb0c112ecf981cabf4cd65efe7b8de2d2))
+* **deps:** bump golang.org/x/crypto from 0.45.0 to 0.52.0 ([#101](https://github.com/matzegebbe/web-jwks-validator/issues/101)) ([ad9e62c](https://github.com/matzegebbe/web-jwks-validator/commit/ad9e62c32f66bae8b22aadfea24b582ad3df2d6c))
+
 ## [0.5.0](https://github.com/matzegebbe/web-jwks-validator/compare/v0.4.0...v0.5.0) (2026-04-23)
 
 
