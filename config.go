@@ -1,95 +1,76 @@
 package main
 
 import (
+	"cmp"
 	"log"
 	"os"
 	"strconv"
 	"strings"
 )
 
-func GetPathFromEnv() string {
-	path := os.Getenv("SERVER_PATH")
-	if path == "" {
-		path = "/"
-	}
+func getPathFromEnv() string {
+	path := cmp.Or(os.Getenv("SERVER_PATH"), "/")
 	log.Println("SERVER_PATH:", path)
 	return path
 }
-func GetPortFromEnv() string {
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
-	}
+
+func getPortFromEnv() string {
+	port := cmp.Or(os.Getenv("PORT"), "8080")
 	log.Println("PORT:", port)
 	return port
 }
-func GetJwksURLFromEnv() string {
-	jwksUrl := os.Getenv("JWKS_URL")
-	if jwksUrl == "" {
-		jwksUrl = "https://login.windows.net/common/discovery/keys"
-	}
+
+func getJWKSURLFromEnv() string {
+	jwksURL := cmp.Or(os.Getenv("JWKS_URL"), "https://login.windows.net/common/discovery/keys")
 	// Warn if JWKS URL is not using HTTPS (insecure)
-	if !strings.HasPrefix(jwksUrl, "https://") {
+	if !strings.HasPrefix(jwksURL, "https://") {
 		log.Println("WARNING: JWKS_URL is not using HTTPS - this is insecure and vulnerable to MITM attacks")
 	}
-	log.Println("JWKS_URL:", jwksUrl)
-	return jwksUrl
+	log.Println("JWKS_URL:", jwksURL)
+	return jwksURL
 }
 
-func GetAuthHeaderNameFromEnv() string {
-	authHeaderName := os.Getenv("AUTH_HEADER_NAME")
-	if authHeaderName == "" {
-		authHeaderName = "Authorization"
-	}
+func getAuthHeaderNameFromEnv() string {
+	authHeaderName := cmp.Or(os.Getenv("AUTH_HEADER_NAME"), "Authorization")
 	log.Println("AUTH_HEADER_NAME:", authHeaderName)
 	return authHeaderName
 }
 
-func GetSendBackAccessTokenEnv() bool {
-	sendAccessTokenBackEnv := os.Getenv("AUTH_HEADER_RETURN")
-	sendAccessTokenBack := true
-	if strings.ToLower(sendAccessTokenBackEnv) == "false" {
-		sendAccessTokenBack = false
-	}
+func getSendBackAccessTokenFromEnv() bool {
+	sendAccessTokenBack := !strings.EqualFold(os.Getenv("AUTH_HEADER_RETURN"), "false")
 	log.Println("AUTH_HEADER_RETURN:", sendAccessTokenBack)
 	return sendAccessTokenBack
 }
 
-func GetSendBackAccessTokenNameEnv() string {
-	authHeaderName := os.Getenv("SEND_ACCESS_TOKEN_HEADER_NAME")
-	if authHeaderName == "" {
-		authHeaderName = "Authorization"
-	}
+func getSendBackAccessTokenNameFromEnv() string {
+	authHeaderName := cmp.Or(os.Getenv("SEND_ACCESS_TOKEN_HEADER_NAME"), "Authorization")
 	log.Println("SEND_ACCESS_TOKEN_HEADER_NAME:", authHeaderName)
 	return authHeaderName
 }
 
-func GetSendAllClaimsAsJson() bool {
-	sendAllClaimsAsJsonEnv := os.Getenv("SEND_BACK_CLAIMS")
-	sendAllClaimsAsJson := true
-	if strings.ToLower(sendAllClaimsAsJsonEnv) == "false" {
-		sendAllClaimsAsJson = false
-	}
-	log.Println("SEND_BACK_CLAIMS:", sendAllClaimsAsJson)
-	return sendAllClaimsAsJson
+func getSendAllClaimsAsJSONFromEnv() bool {
+	sendAllClaimsAsJSON := !strings.EqualFold(os.Getenv("SEND_BACK_CLAIMS"), "false")
+	log.Println("SEND_BACK_CLAIMS:", sendAllClaimsAsJSON)
+	return sendAllClaimsAsJSON
 }
 
-func GetClaimContains() []string {
-	if os.Getenv("CLAIMS_CONTAINS") == "" {
+func getRequiredClaimsFromEnv() []string {
+	requiredClaims := os.Getenv("CLAIMS_CONTAINS")
+	if requiredClaims == "" {
 		log.Println("CLAIMS CONTAINS check turned off")
-		return []string{}
+		return nil
 	}
-	claimContainsArr := strings.Split(os.Getenv("CLAIMS_CONTAINS"), ",")
-	log.Println("CLAIMS_CONTAINS:", claimContainsArr)
-	for i, v := range claimContainsArr {
+
+	requiredClaimChecks := strings.Split(requiredClaims, ",")
+	log.Println("CLAIMS_CONTAINS:", requiredClaimChecks)
+	for i, v := range requiredClaimChecks {
 		log.Printf("\tclaim %d: value: %s\n", i, v)
 	}
-	return claimContainsArr
+	return requiredClaimChecks
 }
 
-func GetTTLFromEnv() int {
-	cacheTTLEnv := os.Getenv("CACHE_TTL")
-	ttlInSeconds, err := strconv.Atoi(cacheTTLEnv)
+func getCacheTTLFromEnv() int {
+	ttlInSeconds, err := strconv.Atoi(os.Getenv("CACHE_TTL"))
 	if err != nil {
 		ttlInSeconds = 300 // Default value if conversion fails
 	}
@@ -97,7 +78,7 @@ func GetTTLFromEnv() int {
 	return ttlInSeconds
 }
 
-func GetExpectedIssuer() string {
+func getExpectedIssuerFromEnv() string {
 	issuer := os.Getenv("EXPECTED_ISSUER")
 	if issuer != "" {
 		log.Println("EXPECTED_ISSUER:", issuer)
@@ -107,7 +88,7 @@ func GetExpectedIssuer() string {
 	return issuer
 }
 
-func GetExpectedAudience() string {
+func getExpectedAudienceFromEnv() string {
 	audience := os.Getenv("EXPECTED_AUDIENCE")
 	if audience != "" {
 		log.Println("EXPECTED_AUDIENCE:", audience)

@@ -1,11 +1,13 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
+	"slices"
 	"strings"
 	"sync"
 	"time"
@@ -14,19 +16,26 @@ import (
 	"github.com/go-jose/go-jose/v3/jwt"
 )
 
-// Cache struct
-type Cache struct {
-	sync.RWMutex
-	jwks    *jose.JSONWebKeySet
-	expires time.Time
+type keySetCache struct {
+	mu        sync.RWMutex
+	keySet    *jose.JSONWebKeySet
+	expiresAt time.Time
 }
 
-type CustomClaims struct {
-	Roles []string `json:"roles,omitempty"`
+type validatorConfig struct {
+	jwksURL                   string
+	authHeaderName            string
+	sendAccessTokenBack       bool
+	sendAccessTokenHeaderName string
+	cacheTTL                  time.Duration
+	sendAllClaimsAsJSON       bool
+	requiredClaims            []string
+	expectedIssuer            string
+	expectedAudience          string
 }
 
 var (
-	jwksCache = Cache{}
+	jwksCache = keySetCache{}
 	version   = "dev"
 	commit    = "none"
 	date      = "unknown"
@@ -35,50 +44,35 @@ var (
 func main() {
 	log.Printf("VERSION %s, COMMIT %s, BUILD AT %s", version, commit, date)
 
-	port := GetPortFromEnv()
-	jwksUrl := GetJwksURLFromEnv()
-	authHeaderName := GetAuthHeaderNameFromEnv()
-	sendAccessTokenBack := GetSendBackAccessTokenEnv()
-	sendAccessTokenBackName := GetSendBackAccessTokenNameEnv()
-	sendAllClaimsAsJson := GetSendAllClaimsAsJson()
-	ttlInSeconds := GetTTLFromEnv()
-	claimContainsCheck := GetClaimContains()
-	expectedIssuer := GetExpectedIssuer()
-	expectedAudience := GetExpectedAudience()
+	config := validatorConfig{
+		jwksURL:                   getJWKSURLFromEnv(),
+		authHeaderName:            getAuthHeaderNameFromEnv(),
+		sendAccessTokenBack:       getSendBackAccessTokenFromEnv(),
+		sendAccessTokenHeaderName: getSendBackAccessTokenNameFromEnv(),
+		cacheTTL:                  time.Duration(getCacheTTLFromEnv()) * time.Second,
+		sendAllClaimsAsJSON:       getSendAllClaimsAsJSONFromEnv(),
+		requiredClaims:            getRequiredClaimsFromEnv(),
+		expectedIssuer:            getExpectedIssuerFromEnv(),
+		expectedAudience:          getExpectedAudienceFromEnv(),
+	}
 
-	http.HandleFunc(GetPathFromEnv(), validateToken(
-		jwksUrl,
-		authHeaderName,
-		sendAccessTokenBack,
-		sendAccessTokenBackName,
-		ttlInSeconds,
-		sendAllClaimsAsJson,
-		claimContainsCheck,
-		expectedIssuer,
-		expectedAudience,
-	))
+	mux := http.NewServeMux()
+	mux.HandleFunc(getPathFromEnv(), validateToken(config))
 
 	server := &http.Server{
-		Addr:         ":" + port,
-		ReadTimeout:  10 * time.Second,
-		WriteTimeout: 10 * time.Second,
-		IdleTimeout:  120 * time.Second,
+		Addr:              ":" + getPortFromEnv(),
+		Handler:           mux,
+		ReadHeaderTimeout: 10 * time.Second,
+		ReadTimeout:       10 * time.Second,
+		WriteTimeout:      10 * time.Second,
+		IdleTimeout:       120 * time.Second,
 	}
 	log.Fatal(server.ListenAndServe())
 }
-func validateToken(
-	jwksURL string,
-	authHeaderName string,
-	sendAccessTokenBack bool,
-	sendAccessTokenBackName string,
-	ttlInSeconds int,
-	sendAllClaimsAsJson bool,
-	claimContainsCheck []string,
-	expectedIssuer string,
-	expectedAudience string,
-) http.HandlerFunc {
+
+func validateToken(config validatorConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		tokenString := extractToken(r, authHeaderName)
+		tokenString := extractToken(r, config.authHeaderName)
 		if tokenString == "" {
 			http.Error(w, "No token", http.StatusUnauthorized)
 			return
@@ -90,57 +84,52 @@ func validateToken(
 			return
 		}
 
-		keys, err := getJwksWithCache(jwksURL, ttlInSeconds)
+		keys, err := getJWKSWithCache(r.Context(), config.jwksURL, config.cacheTTL)
 		if err != nil {
 			http.Error(w, "Error fetching JWKS", http.StatusInternalServerError)
 			return
 		}
 
-		claims := make(map[string]interface{})
-		var standardClaims jwt.Claims
 		for _, key := range keys.Keys {
-			err = token.Claims(key, &claims, &standardClaims)
-			if err == nil {
-				// Build expected claims for validation
-				expected := jwt.Expected{Time: time.Now()}
-				if expectedIssuer != "" {
-					expected.Issuer = expectedIssuer
-				}
-				if expectedAudience != "" {
-					expected.Audience = jwt.Audience{expectedAudience}
-				}
+			claims := make(map[string]any)
+			var standardClaims jwt.Claims
+			if err := token.Claims(key, &claims, &standardClaims); err != nil {
+				continue
+			}
 
-				// Validate time-based claims (exp, nbf, iat) and optionally issuer/audience
-				err = standardClaims.Validate(expected)
-				if err != nil {
-					http.Error(w, "Token validation failed", http.StatusUnauthorized)
-					return
-				}
-				if len(claimContainsCheck) > 0 {
-					if !checkIfClaimContainsAllClaimContainsCheck(claims, claimContainsCheck) {
-						http.Error(w, "Missing required claims from token", http.StatusUnauthorized)
-						return
-					}
-				}
-				if sendAccessTokenBack {
-					w.Header().Set(sendAccessTokenBackName, tokenString)
-				}
-				if sendAllClaimsAsJson {
-					responseJSON, err := json.Marshal(claims)
-					if err != nil {
-						http.Error(w, "Failed to marshal JSON", http.StatusInternalServerError)
-						return
-					}
-					_, err = w.Write(responseJSON)
-					if err != nil {
-						http.Error(w, "Failed to write JSON", http.StatusInternalServerError)
-						return
-					}
-				} else {
-					w.Write([]byte("Token valid."))
-				}
+			expected := jwt.Expected{Time: time.Now()}
+			if config.expectedIssuer != "" {
+				expected.Issuer = config.expectedIssuer
+			}
+			if config.expectedAudience != "" {
+				expected.Audience = jwt.Audience{config.expectedAudience}
+			}
+
+			if err := standardClaims.Validate(expected); err != nil {
+				http.Error(w, "Token validation failed", http.StatusUnauthorized)
 				return
 			}
+			if len(config.requiredClaims) > 0 && !claimsContainAll(claims, config.requiredClaims) {
+				http.Error(w, "Missing required claims from token", http.StatusUnauthorized)
+				return
+			}
+			if config.sendAccessTokenBack {
+				w.Header().Set(config.sendAccessTokenHeaderName, tokenString)
+			}
+			if config.sendAllClaimsAsJSON {
+				responseJSON, err := json.Marshal(claims)
+				if err != nil {
+					http.Error(w, "Failed to marshal JSON", http.StatusInternalServerError)
+					return
+				}
+				if _, err := w.Write(responseJSON); err != nil {
+					http.Error(w, "Failed to write JSON", http.StatusInternalServerError)
+					return
+				}
+			} else {
+				_, _ = w.Write([]byte("Token valid."))
+			}
+			return
 		}
 
 		http.Error(w, "Token could not be validated", http.StatusUnauthorized)
@@ -148,15 +137,14 @@ func validateToken(
 
 }
 
-func checkIfClaimContainsAllClaimContainsCheck(claims map[string]interface{}, claimContainsCheck []string) bool {
-	for _, claimCheck := range claimContainsCheck {
+func claimsContainAll(claims map[string]any, requiredClaimChecks []string) bool {
+	for _, claimCheck := range requiredClaimChecks {
 		claimCheck = strings.ReplaceAll(claimCheck, "\"", "")
-		parts := strings.Split(claimCheck, "=")
-		if len(parts) != 2 {
+		key, value, ok := strings.Cut(claimCheck, "=")
+		if !ok {
 			log.Println("Invalid claim check", claimCheck)
 			return false
 		}
-		key, value := parts[0], parts[1]
 		claimValue, exists := claims[key]
 		if !exists {
 			return false
@@ -169,22 +157,15 @@ func checkIfClaimContainsAllClaimContainsCheck(claims map[string]interface{}, cl
 				return false
 			}
 		case []string:
-			found := false
-			for _, s := range v {
-				if s == value {
-					found = true
-					break
-				}
-			}
-			if !found {
+			if !slices.Contains(v, value) {
 				return false
 			}
-		case []interface{}:
+		case []any:
 			found := false
-			for _, iface := range v {
-				s, ok := iface.(string)
+			for _, item := range v {
+				s, ok := item.(string)
 				if !ok {
-					log.Printf("Unexpected type %T in []interface{} for key %s\n", iface, key)
+					log.Printf("Unexpected type %T in []any for key %s\n", item, key)
 					return false
 				}
 				if s == value {
@@ -204,62 +185,76 @@ func checkIfClaimContainsAllClaimContainsCheck(claims map[string]interface{}, cl
 }
 
 func extractToken(r *http.Request, authHeaderName string) string {
-	authHeader := r.Header.Get(authHeaderName)
-	// often we have bearer token
-	strArr := strings.Split(authHeader, " ")
-	if len(strArr) == 2 {
-		return strArr[1]
-	} else if len(strArr) == 1 {
-		return strArr[0]
+	fields := strings.Fields(r.Header.Get(authHeaderName))
+	switch len(fields) {
+	case 1:
+		return fields[0]
+	case 2:
+		return fields[1]
+	default:
+		return ""
 	}
-	return ""
 }
 
-func getJwksWithCache(jwksURL string, ttlInSeconds int) (*jose.JSONWebKeySet, error) {
-	jwksCache.RLock()
-	if jwksCache.jwks != nil && time.Now().Before(jwksCache.expires) {
-		defer jwksCache.RUnlock()
-		return jwksCache.jwks, nil
+func getJWKSWithCache(ctx context.Context, jwksURL string, ttl time.Duration) (*jose.JSONWebKeySet, error) {
+	jwksCache.mu.RLock()
+	if jwksCache.keySet != nil && time.Now().Before(jwksCache.expiresAt) {
+		defer jwksCache.mu.RUnlock()
+		return jwksCache.keySet, nil
 	}
-	jwksCache.RUnlock()
+	jwksCache.mu.RUnlock()
 
-	jwksCache.Lock()
-	defer jwksCache.Unlock()
+	jwksCache.mu.Lock()
+	defer jwksCache.mu.Unlock()
 
 	// Double-checked locking
-	if jwksCache.jwks != nil && time.Now().Before(jwksCache.expires) {
-		return jwksCache.jwks, nil
+	if jwksCache.keySet != nil && time.Now().Before(jwksCache.expiresAt) {
+		return jwksCache.keySet, nil
 	}
 
-	jwks, err := getJwks(jwksURL)
+	jwks, err := getJWKS(ctx, jwksURL)
 	if err != nil {
 		return nil, err
 	}
 
-	jwksCache.jwks = jwks
-	jwksCache.expires = time.Now().Add(time.Duration(ttlInSeconds) * time.Second)
+	jwksCache.keySet = jwks
+	jwksCache.expiresAt = time.Now().Add(ttl)
 
-	return jwksCache.jwks, nil
+	return jwksCache.keySet, nil
 }
 
 var httpClient = &http.Client{Timeout: 10 * time.Second}
 
-const maxJWKSResponseSize = 1024 * 1024 // 1MB
+const maxJWKSResponseSize = 1 << 20 // 1 MiB
 
-func getJwks(jwksURL string) (*jose.JSONWebKeySet, error) {
-	resp, err := httpClient.Get(jwksURL)
+func getJWKS(ctx context.Context, jwksURL string) (*jose.JSONWebKeySet, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, jwksURL, nil)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("create JWKS request: %w", err)
+	}
+
+	resp, err := httpClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("fetch JWKS: %w", err)
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("JWKS fetch failed with status: %d", resp.StatusCode)
+		return nil, fmt.Errorf("fetch JWKS: unexpected HTTP status %d", resp.StatusCode)
 	}
 
-	var jwks = new(jose.JSONWebKeySet)
-	limitedReader := io.LimitReader(resp.Body, maxJWKSResponseSize)
-	err = json.NewDecoder(limitedReader).Decode(jwks)
+	body, err := io.ReadAll(io.LimitReader(resp.Body, maxJWKSResponseSize+1))
+	if err != nil {
+		return nil, fmt.Errorf("read JWKS response: %w", err)
+	}
+	if len(body) > maxJWKSResponseSize {
+		return nil, fmt.Errorf("read JWKS response: exceeds %d-byte limit", maxJWKSResponseSize)
+	}
 
-	return jwks, err
+	jwks := new(jose.JSONWebKeySet)
+	if err := json.Unmarshal(body, jwks); err != nil {
+		return nil, fmt.Errorf("decode JWKS response: %w", err)
+	}
+
+	return jwks, nil
 }
