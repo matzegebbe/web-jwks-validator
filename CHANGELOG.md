@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.0](https://github.com/matzegebbe/web-jwks-validator/compare/v0.7.0...v0.8.0) (2026-09-15)
+
+
+### Features
+
+* modern go 1.27 ([#110](https://github.com/matzegebbe/web-jwks-validator/issues/110)) ([b4d2863](https://github.com/matzegebbe/web-jwks-validator/commit/b4d2863d79402b5c8fb170f225780d7d259e7174))
+
 ## [0.7.0](https://github.com/matzegebbe/web-jwks-validator/compare/v0.6.0...v0.7.0) (2026-08-24)
 
 
