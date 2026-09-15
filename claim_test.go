@@ -1,51 +1,95 @@
 package main
 
 import (
+	"net/http"
 	"testing"
 )
 
-func TestCheckIfClaimContainsAllClaimContainsCheck(t *testing.T) {
-	// Define some test cases
-	testCases := []struct {
-		claims             map[string]interface{}
+func TestClaimsContainAll(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name               string
+		claims             map[string]any
 		claimContainsCheck []string
-		expectedResult     bool
-		description        string
+		want               bool
 	}{
 		{
-			claims: map[string]interface{}{
+			name: "all required claims exist",
+			claims: map[string]any{
 				"name": "John",
-				"tags": []interface{}{"student", "admin"},
+				"tags": []any{"student", "admin"},
 			},
 			claimContainsCheck: []string{"name=John", "tags=admin"},
-			expectedResult:     true,
-			description:        "Case 1: Expected to return true",
+			want:               true,
 		},
 		{
-			claims: map[string]interface{}{
+			name: "required slice value is missing",
+			claims: map[string]any{
 				"name": "John",
 				"tags": []string{"student", "developer"},
 			},
 			claimContainsCheck: []string{"name=John", "tags=admin"},
-			expectedResult:     false,
-			description:        "Case 2: Expected to return false",
+			want:               false,
 		},
 		{
-			claims: map[string]interface{}{
+			name: "required string value is missing",
+			claims: map[string]any{
 				"name": "Ralle",
 				"tags": []string{"student", "developer"},
 			},
 			claimContainsCheck: []string{"name=John", "tags=admin"},
-			expectedResult:     false,
-			description:        "Case 2: Expected to return false",
+			want:               false,
+		},
+		{
+			name: "claim value contains separator",
+			claims: map[string]any{
+				"scope": "resource=read",
+			},
+			claimContainsCheck: []string{"scope=resource=read"},
+			want:               true,
 		},
 	}
 
-	for _, tc := range testCases {
-		result := checkIfClaimContainsAllClaimContainsCheck(tc.claims, tc.claimContainsCheck)
-		if result != tc.expectedResult {
-			t.Errorf("%s: checkIfClaimContainsAllClaimContainsCheck() = %v;"+
-				"want %v", tc.description, result, tc.expectedResult)
-		}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			if got := claimsContainAll(tt.claims, tt.claimContainsCheck); got != tt.want {
+				t.Errorf("claimsContainAll() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestExtractToken(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name  string
+		value string
+		want  string
+	}{
+		{name: "bearer token", value: "Bearer signed-token", want: "signed-token"},
+		{name: "raw token", value: "signed-token", want: "signed-token"},
+		{name: "repeated whitespace", value: "Bearer   signed-token", want: "signed-token"},
+		{name: "empty header", want: ""},
+		{name: "too many fields", value: "Bearer signed-token unexpected", want: ""},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			req, err := http.NewRequest(http.MethodGet, "/", nil)
+			if err != nil {
+				t.Fatalf("http.NewRequest() error = %v", err)
+			}
+			req.Header.Set("Authorization", tt.value)
+
+			if got := extractToken(req, "Authorization"); got != tt.want {
+				t.Errorf("extractToken() = %q, want %q", got, tt.want)
+			}
+		})
 	}
 }

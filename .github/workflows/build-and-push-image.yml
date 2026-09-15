@@ -16,10 +16,10 @@ jobs:
     permissions: write-all
     steps:
       - name: Checkout code
-        uses: actions/checkout@v7
+        uses: actions/checkout@v7.0.1
 
       - name: Set up Go
-        uses: actions/setup-go@v7
+        uses: actions/setup-go@v7.0.0
         with:
           go-version-file: go.mod
 
@@ -30,10 +30,10 @@ jobs:
         run: go test ./...
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v4
+        uses: docker/setup-qemu-action@v4.4.0
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
+        uses: docker/setup-buildx-action@v4.4.0
 
       - name: Docker Login
         if: github.event_name == 'push'
@@ -45,11 +45,13 @@ jobs:
 
       - name: Set environment variable
         if: github.event_name == 'push'
-        run: echo "IMAGE_TAG=$(echo ${{ github.ref_name }} | sed 's/\//-/g')" >> $GITHUB_ENV
+        env:
+          REF_NAME: ${{ github.ref_name }}
+        run: echo "IMAGE_TAG=${REF_NAME//\//-}" >> "$GITHUB_ENV"
 
       - name: Build and push Docker image
         if: github.event_name == 'push'
-        uses: docker/build-push-action@v7
+        uses: docker/build-push-action@v7.4.0
         with:
           context: .
           platforms: linux/amd64,linux/arm64
