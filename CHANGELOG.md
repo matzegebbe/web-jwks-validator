@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.0](https://github.com/matzegebbe/web-jwks-validator/compare/v0.8.0...v0.9.0) (2026-09-21)
+
+
+### Features
+
+* **deps:** bump docker/setup-buildx-action from 4.4.0 to 4.4.1 ([#112](https://github.com/matzegebbe/web-jwks-validator/issues/112)) ([c726f47](https://github.com/matzegebbe/web-jwks-validator/commit/c726f4706042cc593482a03b23a647bcf174df74))
+
 ## [0.8.0](https://github.com/matzegebbe/web-jwks-validator/compare/v0.7.0...v0.8.0) (2026-09-15)
 
 
