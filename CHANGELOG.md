@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.10.0](https://github.com/matzegebbe/web-jwks-validator/compare/v0.9.0...v0.10.0) (2026-10-15)
+
+
+### Features
+
+* **deps:** bump golang from 1.27.1-alpine to 1.27.2-alpine ([#114](https://github.com/matzegebbe/web-jwks-validator/issues/114)) ([4e8dc15](https://github.com/matzegebbe/web-jwks-validator/commit/4e8dc15e002eb1b289e45fed23aa5450418e6de9))
+* **deps:** bump goreleaser/goreleaser-action from 7.2.3 to 7.3.0 ([#116](https://github.com/matzegebbe/web-jwks-validator/issues/116)) ([db2c8e3](https://github.com/matzegebbe/web-jwks-validator/commit/db2c8e30149b09043b360c709fbf7b35a967f6c0))
+
 ## [0.9.0](https://github.com/matzegebbe/web-jwks-validator/compare/v0.8.0...v0.9.0) (2026-09-21)
 
 
