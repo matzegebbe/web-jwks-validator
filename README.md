@@ -27,6 +27,9 @@ feature of `ingress-nginx`.
 
 ## Getting Started
 
+Use Go 1.27.3 or newer. Go uses a rolling support policy rather than a
+separate LTS release; builds use the current stable, supported toolchain.
+
 1. Download or clone this repository.
 
    ```bash
@@ -199,6 +202,38 @@ spec:
 ```
 
 ## Test
+
+### Dependency and toolchain maintenance
+
+Dependabot checks Go modules, GitHub Actions, and both Dockerfiles daily.
+Go security updates are grouped, and dependency commits use `fix(deps)`
+so merged updates trigger patch releases.
+
+The Go image tag in `Dockerfile` is the build toolchain version. CI and
+release workflows read that version so Dependabot's Docker updates also
+update the compiler used for tests and release binaries. Keep the minimum
+Go version in `go.mod` current when upgrading toolchain requirements;
+Dependabot does not independently maintain Go/toolchain directives.
+GoReleaser already installs its latest stable release on each release run.
+
+CI and release builds run `govulncheck` against the selected toolchain and
+application dependencies before publishing. To run it locally:
+
+```bash
+go test ./...
+go run golang.org/x/vuln/cmd/govulncheck@latest ./...
+```
+
+The go-jose v4 upgrade keeps configuration, responses, and standard compact
+JWT validation unchanged. It requires HMAC keys of at least 32 bytes for
+HS256, 48 bytes for HS384, and 64 bytes for HS512. Previously accepted short
+HMAC keys must be rotated. JSON-form JWS messages are no longer accepted as
+JWTs; use the standard three-part compact JWT format.
+It also rejects ECDSA curve/algorithm mismatches and overflowing timestamps.
+
+Enable Dependabot alerts and Dependabot security updates in the repository's
+GitHub Settings → Advanced Security. These settings are separate from
+`.github/dependabot.yml` and require repository administrator access.
 
 ### Quick Test with Duende Demo (No Setup Required)
 

@@ -13,21 +13,33 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    permissions: write-all
+    permissions:
+      contents: read
+      packages: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v7.0.1
 
+      - name: Read Go version from Dockerfile
+        id: toolchain
+        run: sed -n 's/^FROM golang:\([0-9.]*\)-.*$/version=\1/p' Dockerfile >> "$GITHUB_OUTPUT"
+
       - name: Set up Go
         uses: actions/setup-go@v7.0.0
         with:
-          go-version-file: go.mod
+          go-version: ${{ steps.toolchain.outputs.version }}
 
       - name: Install dependencies
         run: go mod download
 
       - name: Test Go application
         run: go test ./...
+
+      - name: Check Go vulnerabilities
+        uses: golang/govulncheck-action@v1.1.0
+        with:
+          go-version-input: ${{ steps.toolchain.outputs.version }}
+          repo-checkout: false
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v4.4.0

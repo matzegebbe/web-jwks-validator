@@ -9,12 +9,14 @@ updates:
       timezone: "Europe/Berlin"
     open-pull-requests-limit: 5
     commit-message:
-      prefix: "feat"
+      prefix: "fix"
       include: "scope"
     labels: ["dependencies", "ci"]
 
   - package-ecosystem: "gomod"
     directory: "/"
+    allow:
+      - dependency-type: "all"
     schedule:
       interval: "daily"
       time: "07:05"
@@ -22,9 +24,12 @@ updates:
     open-pull-requests-limit: 10
     labels: ["dependencies"]
     commit-message:
-      prefix: "feat"
+      prefix: "fix"
       include: "scope"
     groups:
+      go-security:
+        applies-to: security-updates
+        patterns: ["*"]
       go-patch:
         applies-to: version-updates
         patterns: ["*"]
@@ -39,6 +44,8 @@ updates:
         update-types: ["major"]
 
   - package-ecosystem: "docker"
+    # Includes Dockerfile and Dockerfile-goreleaser. CI/release Go versions
+    # are read from Dockerfile so Go image updates update every build path.
     directory: "/"
     schedule:
       interval: "daily"
@@ -46,6 +53,6 @@ updates:
       timezone: "Europe/Berlin"
     labels: ["dependencies", "docker"]
     commit-message:
-      prefix: "feat"
+      prefix: "fix"
       include: "scope"
     open-pull-requests-limit: 5

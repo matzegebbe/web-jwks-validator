@@ -1,6 +1,9 @@
-FROM golang:1.27.2-alpine AS builder
+FROM golang:1.27.3-alpine3.24 AS builder
 
 WORKDIR /app
+
+# Pick up security fixes published after the base image was built.
+RUN apk --no-cache upgrade
 
 COPY go.mod go.sum ./
 
@@ -13,9 +16,9 @@ COPY . .
 # Build the Go app. CGO_ENABLED=0 for fully static binary.
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o web-jwks-validator .
 
-FROM alpine:3.24
+FROM alpine:3.24.2
 
-RUN apk --no-cache add ca-certificates
+RUN apk --no-cache upgrade && apk --no-cache add ca-certificates
 
 # Create non-root user for security
 RUN adduser -D -u 1000 appuser

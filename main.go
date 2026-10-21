@@ -12,8 +12,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/go-jose/go-jose/v3"
-	"github.com/go-jose/go-jose/v3/jwt"
+	"github.com/go-jose/go-jose/v4"
+	"github.com/go-jose/go-jose/v4/jwt"
 )
 
 type keySetCache struct {
@@ -78,7 +78,14 @@ func validateToken(config validatorConfig) http.HandlerFunc {
 			return
 		}
 
-		token, err := jwt.ParseSigned(tokenString)
+		// go-jose v4 requires an explicit allowlist. Preserve the signed JWT
+		// algorithms supported by v3; unsigned tokens remain rejected.
+		token, err := jwt.ParseSigned(tokenString, []jose.SignatureAlgorithm{
+			jose.HS256, jose.HS384, jose.HS512,
+			jose.RS256, jose.RS384, jose.RS512,
+			jose.ES256, jose.ES384, jose.ES512,
+			jose.PS256, jose.PS384, jose.PS512, jose.EdDSA,
+		})
 		if err != nil {
 			http.Error(w, "Invalid token", http.StatusUnauthorized)
 			return
@@ -102,7 +109,7 @@ func validateToken(config validatorConfig) http.HandlerFunc {
 				expected.Issuer = config.expectedIssuer
 			}
 			if config.expectedAudience != "" {
-				expected.Audience = jwt.Audience{config.expectedAudience}
+				expected.AnyAudience = jwt.Audience{config.expectedAudience}
 			}
 
 			if err := standardClaims.Validate(expected); err != nil {
