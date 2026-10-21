@@ -8,7 +8,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    permissions: write-all
+    permissions:
+      contents: write
+      packages: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v7.0.1
@@ -26,10 +28,23 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Read Go version from Dockerfile
+        id: toolchain
+        run: sed -n 's/^FROM golang:\([0-9.]*\)-.*$/version=\1/p' Dockerfile >> "$GITHUB_OUTPUT"
+
       - name: Set up Go
         uses: actions/setup-go@v7.0.0
         with:
-          go-version-file: go.mod
+          go-version: ${{ steps.toolchain.outputs.version }}
+
+      - name: Test Go application
+        run: go test ./...
+
+      - name: Check Go vulnerabilities
+        uses: golang/govulncheck-action@v1.1.0
+        with:
+          go-version-input: ${{ steps.toolchain.outputs.version }}
+          repo-checkout: false
 
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v7.3.0
