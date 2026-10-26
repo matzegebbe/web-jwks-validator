@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.10.1](https://github.com/matzegebbe/web-jwks-validator/compare/v0.10.0...v0.10.1) (2026-10-26)
+
+
+### Bug Fixes
+
+* **deps:** bump alpine from 3.24.2 to 3.24.3 ([#120](https://github.com/matzegebbe/web-jwks-validator/issues/120)) ([972b79c](https://github.com/matzegebbe/web-jwks-validator/commit/972b79c31ffc9b51e23ecddac10971a1b9ee3466))
+* **deps:** bump docker/login-action from 4.6.0 to 4.7.0 ([#118](https://github.com/matzegebbe/web-jwks-validator/issues/118)) ([1a83e1c](https://github.com/matzegebbe/web-jwks-validator/commit/1a83e1cc04ee59b6b33e3d20ae2ab876ad79e3ad))
+
 ## [0.10.0](https://github.com/matzegebbe/web-jwks-validator/compare/v0.9.0...v0.10.0) (2026-10-21)
 
 
