@@ -16,7 +16,7 @@ COPY . .
 # Build the Go app. CGO_ENABLED=0 for fully static binary.
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o web-jwks-validator .
 
-FROM alpine:3.24.2
+FROM alpine:3.24.3
 
 RUN apk --no-cache upgrade && apk --no-cache add ca-certificates
 
