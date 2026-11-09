@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.10.2](https://github.com/matzegebbe/web-jwks-validator/compare/v0.10.1...v0.10.2) (2026-11-09)
+
+
+### Bug Fixes
+
+* **deps:** bump docker/login-action from 4.7.0 to 4.8.0 ([#123](https://github.com/matzegebbe/web-jwks-validator/issues/123)) ([5f656c0](https://github.com/matzegebbe/web-jwks-validator/commit/5f656c0bbe752d59be1d0508cb7fbefd41ef7bc7))
+* **deps:** bump github.com/go-jose/go-jose/v4 ([#125](https://github.com/matzegebbe/web-jwks-validator/issues/125)) ([98922a7](https://github.com/matzegebbe/web-jwks-validator/commit/98922a71ae8605b07c7b696f57fc2dcedbe3138c))
+
 ## [0.10.1](https://github.com/matzegebbe/web-jwks-validator/compare/v0.10.0...v0.10.1) (2026-11-06)
 
 
