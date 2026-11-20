@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.3](https://github.com/matzegebbe/web-jwks-validator/compare/v0.10.2...v0.10.3) (2026-11-20)
+
+
+### Bug Fixes
+
+* **deps:** bump actions/setup-go from 7.0.0 to 7.1.0 ([#128](https://github.com/matzegebbe/web-jwks-validator/issues/128)) ([f42ecb3](https://github.com/matzegebbe/web-jwks-validator/commit/f42ecb34df3ee285cfb315031f2f5692af7daec3))
+
 ## [0.10.2](https://github.com/matzegebbe/web-jwks-validator/compare/v0.10.1...v0.10.2) (2026-11-16)
 
 
